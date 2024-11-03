@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	_ "sync"
 	"time"
 )
 
@@ -30,6 +31,8 @@ type Holder struct {
 	Data []KeyValue
 }
 
+// var filesMutex sync.Mutex
+
 // use ihash(key) % NReduce to choose the reduce
 // task number for each KeyValue emitted by Map.
 func ihash(key string) int {
@@ -39,14 +42,16 @@ func ihash(key string) int {
 }
 
 func appendToFile(filename string, contents []KeyValue) {
-	f, _ := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	// filesMutex.Lock()
+	// defer filesMutex.Unlock()
+	f, _ := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0644)
 	var existing Holder
 	text, _ := io.ReadAll(f)
 	json.Unmarshal(text, &existing)
 	existing.Data = append(existing.Data, contents...)
 	os.Remove(filename)
 	f.Close()
-	f2, _ := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	f2, _ := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0644)
 	defer f2.Close()
 	toWrite, _ := json.Marshal(existing)
 	// ct := strings.Count(string(toWrite), "yesterday")

@@ -106,11 +106,6 @@ func selectTask(c *Coordinator, reply *GetTaskReply, taskType TaskType) {
 }
 
 func (c *Coordinator) GetTask(_ *struct{}, reply *GetTaskReply) error {
-	// Need to give the task
-	// if some task has taken more than 10s, give that
-	// else give from top of list
-	// if empty, don't give anything? ask to wait? don't know
-	//default value for hasTask
 	reply.HasTask = false
 
 	map_tasks_mu.Lock()
@@ -170,11 +165,11 @@ func (c *Coordinator) TaskOverNotify(task Task, response *bool) error {
 			}
 			totallyComplete = totallyComplete && c.red_tasks[i].CurrentState == TASK_STATE_DONE
 		}
-		red_tasks_mu.Unlock()
 		if totallyComplete {
-			// make rpc calls to stop the workers
+			//TODO: make rpc calls to stop the workers
 			done = true
 		}
+		red_tasks_mu.Unlock()
 	}
 	return nil
 }
@@ -198,6 +193,8 @@ func (c *Coordinator) server() {
 // if the entire job has finished.
 func (c *Coordinator) Done() bool {
 	// Your code here.
+	red_tasks_mu.Lock()
+	defer red_tasks_mu.Unlock()
 	return done
 }
 
