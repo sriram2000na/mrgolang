@@ -23,7 +23,16 @@ type ExampleReply struct {
 }
 
 // Add your RPC definitions here.
+type GetTaskArgs struct {
+}
 
+type TaskOverNotifyReply struct {
+}
+
+type GetTaskReply struct {
+	Task    Task
+	HasTask bool
+}
 
 // Cook up a unique-ish UNIX-domain socket name
 // in /var/tmp, for the coordinator.
